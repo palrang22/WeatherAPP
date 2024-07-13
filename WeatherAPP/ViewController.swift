@@ -10,6 +10,9 @@ import SnapKit
 
 class ViewController: UIViewController {
     
+    // dataSource는 항상 리스트 타입
+    private var dataSource = [ForecastWeather]()
+    
     // URLQueryItem은 String으로 넣어줘야 함
     private let urlQueryItems: [URLQueryItem] = [
         URLQueryItem(name: "lat", value: "37.5"),
@@ -65,10 +68,23 @@ class ViewController: UIViewController {
         return imageview
     }()
     
+    private lazy var tableView: UITableView = {
+        let tableview = UITableView()
+        tableview.backgroundColor = .black
+        tableview.delegate = self
+        tableview.dataSource = self
+        
+        // 테이블뷰에 테이블뷰셀 등록
+        tableview.register(TableViewCell.self, forCellReuseIdentifier: TableViewCell.id)
+        
+        return tableview
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         configureUI()
         fetchCurrentWeatherData()
+        fetchForecastData()
     }
     
     //서버 데이터 불러오는 일반적인 메서드
@@ -136,10 +152,34 @@ class ViewController: UIViewController {
             }
         }
     }
+    
+    // 서버에서 5일간 날씨 예보 데이터를 불러오는 메서드
+    private func fetchForecastData() {
+        var urlComponents = URLComponents(string: "https://api.openweathermap.org/data/2.5/forecast")
+        urlComponents?.queryItems = self.urlQueryItems
+        
+        guard let url = urlComponents?.url else {
+            print("잘못된 URL")
+            return
+        }
+        
+        fetchData(url: url) { [weak self] (result: ForecastWeatherResult?) in
+            guard let self, let result else { return }
+            // 콘솔에 데이터 잘 불러왔는지 찍어보기
+            for forecastWeather in result.list {
+                print("\(forecastWeather.main) \(forecastWeather.dtTxt)")
+            }
+            
+            DispatchQueue.main.async {
+                self.dataSource = result.list
+                self.tableView.reloadData()
+            }
+        }
+    }
 
     private func configureUI() {
         view.backgroundColor = .black
-        [titleLabel, tempLabel, tempStackView, imageView].forEach{ view.addSubview($0) }
+        [titleLabel, tempLabel, tempStackView, imageView, tableView].forEach{ view.addSubview($0) }
         
         [tempMinLabel, tempMaxLabel].forEach{ tempStackView.addArrangedSubview($0) }
         
@@ -164,6 +204,35 @@ class ViewController: UIViewController {
             $0.top.equalTo(tempStackView.snp.bottom).offset(20)
         }
         
+        tableView.snp.makeConstraints {
+            $0.top.equalTo(imageView.snp.bottom).offset(30)
+            $0.leading.trailing.equalToSuperview().inset(20)
+            $0.bottom.equalToSuperview().inset(50)
+        }
     }
 }
 
+extension ViewController: UITableViewDelegate {
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        40
+    }
+    
+}
+
+extension ViewController: UITableViewDataSource {
+    
+    //tableView의 indexPath 마다 테이블뷰 셀을 지정
+    // indexPath = 테이블뷰의 행과 섹션을 의미
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        dataSource.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: TableViewCell.id) as? TableViewCell else {
+            return UITableViewCell()
+        }
+        cell.configureCell(forecastWeather: dataSource[indexPath.row])
+        return cell
+    }
+}
