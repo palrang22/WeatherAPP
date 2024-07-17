@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E755113D2C474C4A00F981F5 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = E755113C2C474C4A00F981F5 /* Alamofire */; };
 		E7C7AB9A2C40F86900807C2B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7C7AB992C40F86900807C2B /* AppDelegate.swift */; };
 		E7C7AB9C2C40F86900807C2B /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7C7AB9B2C40F86900807C2B /* SceneDelegate.swift */; };
 		E7C7AB9E2C40F86900807C2B /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7C7AB9D2C40F86900807C2B /* ViewController.swift */; };
@@ -40,6 +41,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E7C7ABB22C40FAA200807C2B /* SnapKit in Frameworks */,
+				E755113D2C474C4A00F981F5 /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -98,6 +100,7 @@
 			name = WeatherAPP;
 			packageProductDependencies = (
 				E7C7ABB12C40FAA200807C2B /* SnapKit */,
+				E755113C2C474C4A00F981F5 /* Alamofire */,
 			);
 			productName = WeatherAPP;
 			productReference = E7C7AB962C40F86900807C2B /* WeatherAPP.app */;
@@ -129,6 +132,7 @@
 			mainGroup = E7C7AB8D2C40F86900807C2B;
 			packageReferences = (
 				E7C7ABB02C40FAA200807C2B /* XCRemoteSwiftPackageReference "SnapKit" */,
+				E755113B2C474C4900F981F5 /* XCRemoteSwiftPackageReference "Alamofire" */,
 			);
 			productRefGroup = E7C7AB972C40F86900807C2B /* Products */;
 			projectDirPath = "";
@@ -385,6 +389,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		E755113B2C474C4900F981F5 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.9.1;
+			};
+		};
 		E7C7ABB02C40FAA200807C2B /* XCRemoteSwiftPackageReference "SnapKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SnapKit/SnapKit";
@@ -396,6 +408,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		E755113C2C474C4A00F981F5 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E755113B2C474C4900F981F5 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
 		E7C7ABB12C40FAA200807C2B /* SnapKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = E7C7ABB02C40FAA200807C2B /* XCRemoteSwiftPackageReference "SnapKit" */;

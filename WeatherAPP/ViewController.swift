@@ -7,6 +7,7 @@
 
 import UIKit
 import SnapKit
+import Alamofire
 
 class ViewController: UIViewController {
     
@@ -87,33 +88,43 @@ class ViewController: UIViewController {
         fetchForecastData()
     }
     
-    //서버 데이터 불러오는 일반적인 메서드
-    // Decodable을 채택하는 어떤 타입도 T? 안에 들어갈 수 있다
-    // 가져와야 할 API가 2가지인데, 어느 타입에서라도 일반적으로 재사용할 수 있게 제네릭을 사용함
-    // escaping 클로저: 메서드가 끝이 나더라도 탈출해서 돌아다니다 언제든지 실행될 수 있다는 뜻
-    private func fetchData <T: Decodable>(url: URL, completion: @escaping (T?) -> Void) {
-        let session = URLSession(configuration: .default)
-        session.dataTask(with: URLRequest(url: url)) { data, response, error in
-            guard let data, error == nil else {
-                print("데이터 로드 실패")
-                completion(nil)
-                return
-            }
-            // http status 코드 성공 범위는 200번대
-            // HTTPURLResponse 안에 http status code를 깔 수 있기 때문에 타입 캐스팅
-            let successRange = 200..<300
-            if let response = response as? HTTPURLResponse, successRange.contains(response.statusCode) {
-                guard let decodedData = try? JSONDecoder().decode(T.self, from: data) else {
-                    print("Json 디코딩 실패")
-                    completion(nil)
-                    return
-                }
-                completion(decodedData)
-            } else {
-                print("응답 오류")
-                completion(nil)
-            }
-        }.resume()
+//    //서버 데이터 불러오는 일반적인 메서드
+//    // Decodable을 채택하는 어떤 타입도 T? 안에 들어갈 수 있다
+//    // 가져와야 할 API가 2가지인데, 어느 타입에서라도 일반적으로 재사용할 수 있게 제네릭을 사용함
+//    // escaping 클로저: 메서드가 끝이 나더라도 탈출해서 돌아다니다 언제든지 실행될 수 있다는 뜻
+//    private func fetchData <T: Decodable>(url: URL, completion: @escaping (T?) -> Void) {
+//        let session = URLSession(configuration: .default)
+//        session.dataTask(with: URLRequest(url: url)) { data, response, error in
+//            guard let data, error == nil else {
+//                print("데이터 로드 실패")
+//                completion(nil)
+//                return
+//            }
+//            // http status 코드 성공 범위는 200번대
+//            // HTTPURLResponse 안에 http status code를 깔 수 있기 때문에 타입 캐스팅
+//            let successRange = 200..<300
+//            if let response = response as? HTTPURLResponse, successRange.contains(response.statusCode) {
+//                guard let decodedData = try? JSONDecoder().decode(T.self, from: data) else {
+//                    print("Json 디코딩 실패")
+//                    completion(nil)
+//                    return
+//                }
+//                completion(decodedData)
+//            } else {
+//                print("응답 오류")
+//                completion(nil)
+//            }
+//        }.resume()
+//    }
+    
+    // Alamofire 사용해 서버 데이터 불러오는 메서드
+    // status code 지정 필요 X
+    // 성공시 T, 실패시 AFError
+    // responseDecodable 안에 decode 코드가 축약되어 들어가 있음
+    private func fetchDataByAlamofire<T: Decodable>(url: URL, completion: @escaping (Result<T, AFError>) -> Void) {
+        AF.request(url).responseDecodable(of: T.self) { response in
+            completion(response.result)
+        }
     }
     
     private func fetchCurrentWeatherData() {
@@ -128,27 +139,55 @@ class ViewController: UIViewController {
         // 이렇게 타입 명시해주면 위의 T들이 CurrentWeatherResult로 인식
         // 강한 참조 순환 방지 위해 weak self 사용
         // 서버에서 불러오는 데이터는 백그라운드 스레드에서 처리 - UI를 그리는 작업은 메인스레드에서 처리, 따라서 서버 데이터는 백그라운드스레드
-        fetchData(url: url) { [weak self] (result: CurrentWeatherResult?) in
-            guard let self, let result else {return}
-            
-            // 현재 백그라운드스레드에서 작업중, 하지만 UI는 반드시 메인스레드에서 작업되어야 하기에 이를 명시해줌
-            DispatchQueue.main.async {
-                self.tempLabel.text = "\(Int(result.main.temp))°C"
-                self.tempMinLabel.text = "최저: \(Int(result.main.tempMin))°C"
-                self.tempMaxLabel.text = "최고: \(Int(result.main.tempMax))°C"
-            }
-            
-            guard let imageUrl = URL(string: "https://openweathermap.org/img/wn/\(result.weather[0].icon)@2x.png") else {
-                return
-            }
-            
-            // image 로드 작업도 백그라운드스레드 작업, 따라서 UI작업 main스레드 작업 명시
-            if let data = try? Data(contentsOf: imageUrl) {
-                if let image = UIImage(data: data) {
-                    DispatchQueue.main.async {
-                        self.imageView.image = image
+        //        fetchData(url: url) { [weak self] (result: CurrentWeatherResult?) in
+        //            guard let self, let result else {return}
+        //
+        //            // 현재 백그라운드스레드에서 작업중, 하지만 UI는 반드시 메인스레드에서 작업되어야 하기에 이를 명시해줌
+        //            DispatchQueue.main.async {
+        //                self.tempLabel.text = "\(Int(result.main.temp))°C"
+        //                self.tempMinLabel.text = "최저: \(Int(result.main.tempMin))°C"
+        //                self.tempMaxLabel.text = "최고: \(Int(result.main.tempMax))°C"
+        //            }
+        //
+        //            guard let imageUrl = URL(string: "https://openweathermap.org/img/wn/\(result.weather[0].icon)@2x.png") else {
+        //                return
+        //            }
+        //
+        //            // image 로드 작업도 백그라운드스레드 작업, 따라서 UI작업 main스레드 작업 명시
+        //            if let data = try? Data(contentsOf: imageUrl) {
+        //                if let image = UIImage(data: data) {
+        //                    DispatchQueue.main.async {
+        //                        self.imageView.image = image
+        //                    }
+        //                }
+        //            }
+        //        }
+        
+        fetchDataByAlamofire(url: url) { [weak self] (result: Result<CurrentWeatherResult, AFError>) in
+            guard let self else { return }
+            switch result {
+            case .success(let result):
+                DispatchQueue.main.async {
+                    self.tempLabel.text = "\(Int(result.main.temp))°C"
+                    self.tempMinLabel.text = "최저: \(Int(result.main.tempMin))°C"
+                    self.tempMaxLabel.text = "최고: \(Int(result.main.tempMax))°C"
+                }
+                
+                guard let imageUrl = URL(string: "https://openweathermap.org/img/wn/\(result.weather[0].icon)@2x.png") else {
+                    return
+                }
+                
+                // Alamofire 사용한 이미지 로드
+                AF.request(imageUrl).responseData { response in
+                    if let data = response.data, let image = UIImage(data: data) {
+                        DispatchQueue.main.async {
+                            self.imageView.image = image
+                        }
                     }
                 }
+            case .failure(let error):
+                print("데이터 로드 실패")
+                
             }
         }
     }
@@ -163,16 +202,29 @@ class ViewController: UIViewController {
             return
         }
         
-        fetchData(url: url) { [weak self] (result: ForecastWeatherResult?) in
-            guard let self, let result else { return }
-            // 콘솔에 데이터 잘 불러왔는지 찍어보기
-            for forecastWeather in result.list {
-                print("\(forecastWeather.main) \(forecastWeather.dtTxt)")
-            }
-            
-            DispatchQueue.main.async {
+        //        fetchData(url: url) { [weak self] (result: ForecastWeatherResult?) in
+        //            guard let self, let result else { return }
+        //            // 콘솔에 데이터 잘 불러왔는지 찍어보기
+        //            for forecastWeather in result.list {
+        //                print("\(forecastWeather.main) \(forecastWeather.dtTxt)")
+        //            }
+        //
+        //            DispatchQueue.main.async {
+        //                self.dataSource = result.list
+        //                self.tableView.reloadData()
+        //            }
+        //        }
+        
+        fetchDataByAlamofire(url: url) { [weak self] (result: Result<ForecastWeatherResult, AFError>) in
+            guard let self else { return }
+            switch result {
+            case .success(let result):
+                DispatchQueue.main.async {
                 self.dataSource = result.list
                 self.tableView.reloadData()
+            }
+            case.failure(let error):
+                print("데이터 로드 실패")
             }
         }
     }
