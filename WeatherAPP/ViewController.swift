@@ -17,7 +17,7 @@ class ViewController: UIViewController {
     private let urlQueryItems: [URLQueryItem] = [
         URLQueryItem(name: "lat", value: "37.5"),
         URLQueryItem(name: "lon", value: "126.9"),
-        URLQueryItem(name: "appid", value: "91fa5e13abcadd8fcfa36ccfd2d445e4"),
+        URLQueryItem(name: "appid", value: Bundle.main.infoDictionary?["WEATHER_API"] as? String),
         URLQueryItem(name: "units", value: "metric")
     ]
 

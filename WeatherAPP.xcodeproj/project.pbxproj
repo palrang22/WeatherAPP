@@ -20,6 +20,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		E755113A2C47459800F981F5 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 		E7C7AB962C40F86900807C2B /* WeatherAPP.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WeatherAPP.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E7C7AB992C40F86900807C2B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E7C7AB9B2C40F86900807C2B /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -74,6 +75,7 @@
 				E7C7ABB32C40FC4B00807C2B /* CurrentWeatherResult.swift */,
 				E7C7ABB52C40FC6200807C2B /* TableViewCell.swift */,
 				E7C7ABB72C40FC7900807C2B /* ForecastWeatherResult.swift */,
+				E755113A2C47459800F981F5 /* Config.xcconfig */,
 			);
 			path = WeatherAPP;
 			sourceTree = "<group>";
@@ -180,6 +182,7 @@
 /* Begin XCBuildConfiguration section */
 		E7C7ABAB2C40F86A00807C2B /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E755113A2C47459800F981F5 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -243,6 +246,7 @@
 		};
 		E7C7ABAC2C40F86A00807C2B /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E755113A2C47459800F981F5 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
